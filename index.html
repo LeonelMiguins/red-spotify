@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <title>Dark Spotify</title>
+</head>
+<body>
+    <header>
+        <div class="header-logo-container">
+            <img class="header-logo" src="img/logo.png">
+            <a>Red Spotify</a>
+        </div>
+        <div class="header-search">
+            <input
+              type="text"
+              id="searchInput"
+              placeholder="Buscar por álbum ou artista"
+            />
+            <div id="searchButton" style="cursor: pointer;"><img src="img/search.png"></div>
+          </div>
+        <button class="header-button-home" onclick="renderAlbumsFromStorage()">Home</button>
+        <button class="header-button-playlists">Playlists</button>
+        <button class="header-button-top-artist">Top artistas</button>
+        <button class="header-button-top-artist">Rádios</button>
+    </header>
+    <!-- Conteúdo dinâmico gerado aqui-->
+    <div class="dinamic-content" id="dinamic-content"></div>
+    <!-- Player -->
+    <div class="player-container">
+        <audio id="audio-player">
+            <source id="player" src="" type="audio/mpeg">
+            Seu navegador não suporta áudio.
+        </audio>           
+        <div id="progress-bar" class="player-progress-bar">
+            <div id="progress" class="player-progress"></div>
+        </div>
+        <div class="player-container-info">
+            <div class="player-container-thumb">
+                <img src="img/blank.jpg">
+            </div>
+            <div class="player-container-title-artist">
+                <a class="player-container-title">Music Title</a>
+                <a class="player-container-artist">Music Artist</a>
+            </div>
+            <div class="player-container-controls">
+                <img onclick="prevTrack()" class="player-prev" src="img/prev.png">
+                <img class="player-play-pause" src="img/play.png">
+                <img onclick="nextTrack()" class="player-next" src="img/next.png">
+                <a id="download-btn" href="#" download>
+                  <img class="player-down" src="img/download.png">
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+
+    
+</body>
+</html>
