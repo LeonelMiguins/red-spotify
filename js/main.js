@@ -1,4 +1,4 @@
-const server = 'https://api.jsonbin.io/v3/b/682134c18960c979a597a07c';
+const server = ['https://api.jsonbin.io/v3/b/682134c18960c979a597a07c', 'https://api.jsonbin.io/v3/b/6824b0a28a456b79669da82a','https://api.jsonbin.io/v3/b/6824bcf58561e97a5013d51c'];
 const container = document.getElementById('dinamic-content');
 const audioPlayer = document.getElementById('audio-player');
 const playerTitle = document.querySelector('.player-container-title');
@@ -13,39 +13,48 @@ let currentPlaylist = [];
 let currentTrackIndex = -1;
 
 function fetchAndStoreAlbums() {
-  fetch(server)
-    .then(response => response.json())
-    .then(data => {
-      const albums = Array.isArray(data.record) ? data.record : [data.record];
-      localStorage.setItem('albumsData', JSON.stringify(albums));
-    })
-    .catch(error => console.error('Erro ao buscar o JSON:', error));
-}
-
-function renderAlbumsFromStorage() {
-  const albums = JSON.parse(localStorage.getItem('albumsData'));
-  if (!albums) {
-    container.innerHTML = '<p>Dados não encontrados. Recarregue a página.</p>';
-    return;
-  }
-
-  container.innerHTML = '';
-  albums.forEach(album => {
-    const div = document.createElement('div');
-    div.classList.add('dinamic-content-album');
-
-    div.innerHTML = `
-      <img src="${album.image}" alt="${album.title}" onclick="loadAlbum(${Number(album.id)})">
-      <p class="dinamic-content-album-title">${album.title}</p>
-      <a class="dinamic-content-album-artist">${album.artist}</a>
-    `;
-
-    container.appendChild(div);
+  server.forEach((url, index) => {
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        const albums = Array.isArray(data.record) ? data.record : [data.record];
+        const serverKey = `albumsData_${index}`;  // Identificador único para cada servidor
+        localStorage.setItem(serverKey, JSON.stringify(albums));
+      })
+      .catch(error => console.error('Erro ao buscar o JSON:', error));
   });
 }
 
-function loadAlbum(id) {
-  const albums = JSON.parse(localStorage.getItem('albumsData'));
+
+function renderAlbumsFromStorage() {
+  container.innerHTML = ''; // Limpa o conteúdo anterior
+  
+  // Itera sobre os servidores para buscar os álbuns de cada um
+  server.forEach((url, index) => {
+    const serverKey = `albumsData_${index}`;
+    const albums = JSON.parse(localStorage.getItem(serverKey));
+
+    if (albums && albums.length > 0) {
+      albums.forEach(album => {
+        const div = document.createElement('div');
+        div.classList.add('dinamic-content-album');
+
+        div.innerHTML = `
+          <img src="${album.image}" alt="${album.title}" onclick="loadAlbum(${Number(album.id)}, ${index})">
+          <p class="dinamic-content-album-title">${album.title}</p>
+          <a class="dinamic-content-album-artist">${album.artist}</a>
+        `;
+
+        container.appendChild(div);
+      });
+    }
+  });
+}
+
+
+function loadAlbum(id, serverIndex) {
+  const serverKey = `albumsData_${serverIndex}`;
+  const albums = JSON.parse(localStorage.getItem(serverKey));
   const album = albums.find(a => a.id === Number(id));
 
   if (!album) {
@@ -63,10 +72,10 @@ function loadAlbum(id) {
           <h4>Generos: ${album.genre}</h4>
           <h4>Ano: ${album.year}</h4>
           <h4>Upload: ${album.author}</h4>
-            <div class="container-album-btns">
-              <button class="play-album-btn">Ouvir</button>
-              <button class="download-album-btn">Baixar Album</button>
-            </div>  
+          <div class="container-album-btns">
+            <button class="play-album-btn" onclick="playFirstTrack(${id}, ${serverIndex})">Ouvir</button>
+            <button class="back-album-btn" onclick="renderAlbumsFromStorage()">Voltar</button>
+          </div>  
         </div>
       </div>
       <h3>Faixas:</h3>
@@ -74,7 +83,7 @@ function loadAlbum(id) {
         ${
           Array.isArray(album.tracks) && album.tracks.length > 0
             ? album.tracks.map((track, index) => `
-                <div class="album-music" onclick="playTrack('${track.url}', '${track.name}', '${track.artist}', '${album.image}', ${id}, ${index})">
+                <div class="album-music" onclick="playTrack('${track.url}', '${track.name}', '${track.artist}', '${album.image}', ${id}, ${index}, ${serverIndex})">
                   <span class="track-index">${index + 1}</span>
                   <span class="track-name">${track.name}</span>
                   <span class="track-artist">${track.artist}</span>
@@ -83,17 +92,12 @@ function loadAlbum(id) {
             : '<p>Sem faixas disponíveis.</p>'
         }
       </div>
-
-      <button onclick="loadAlbuns()">Voltar</button>
     </div>
   `;
-
-  // Atualiza playlist atual
-  currentPlaylist = album.tracks;
 }
 
-// tocar música
-function playTrack(url, title, artist, image, albumId = null, index = null) {
+//tocar faixa selecionada
+function playTrack(url, title, artist, image, albumId = null, index = null, serverIndex) {
   audioPlayer.src = url;
   audioPlayer.play().catch(error => console.error("Erro ao tentar tocar a música:", error));
 
@@ -107,8 +111,10 @@ function playTrack(url, title, artist, image, albumId = null, index = null) {
 
   // Atualiza o botão de download com a URL da faixa atual
   document.getElementById('download-btn').href = url;
+
   if (albumId !== null && index !== null) {
-    const albums = JSON.parse(localStorage.getItem('albumsData'));
+    const serverKey = `albumsData_${serverIndex}`;
+    const albums = JSON.parse(localStorage.getItem(serverKey));
     const album = albums.find(a => a.id === albumId);
     if (album && Array.isArray(album.tracks)) {
       currentPlaylist = album.tracks;
@@ -116,6 +122,7 @@ function playTrack(url, title, artist, image, albumId = null, index = null) {
     }
   }
 }
+
 
 //próxima música
 function nextTrack() {
@@ -134,6 +141,28 @@ function prevTrack() {
     playTrack(track.url, track.name, track.artist, playerImage.src, null, currentTrackIndex);
   }
 }
+
+// botão "ouvir" playlist
+function playFirstTrack(albumId, serverIndex) {
+  const serverKey = `albumsData_${serverIndex}`;
+  const albums = JSON.parse(localStorage.getItem(serverKey));
+
+  if (!albums) {
+    console.error('Nenhum álbum encontrado para este servidor.');
+    return;
+  }
+  const album = albums.find(a => a.id === Number(albumId));
+  if (!album || !Array.isArray(album.tracks) || album.tracks.length === 0) {
+    console.error('Álbum não encontrado ou sem faixas.');
+    return;
+  }
+  const firstTrack = album.tracks[0];
+  currentPlaylist = album.tracks;
+  currentTrackIndex = 0;
+
+  playTrack(firstTrack.url, firstTrack.name, firstTrack.artist, album.image, albumId, 0, serverIndex);
+}
+
 
 // Atualiza a barra de progresso conforme a música toca
 audioPlayer.addEventListener('timeupdate', () => {
@@ -171,6 +200,7 @@ progressBar.addEventListener('click', (event) => {
   audioPlayer.currentTime = (clickX / width) * duration;
 });
 
+
 // Função de pesquisa
 document.getElementById('searchButton').addEventListener('click', () => {
   const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
@@ -183,10 +213,16 @@ document.getElementById('searchButton').addEventListener('click', () => {
 
   container.innerHTML = ''; // Limpa o conteúdo anterior
 
-  const savedData = localStorage.getItem('albumsData');
-  if (!savedData) return;
+  let albums = [];
 
-  const albums = JSON.parse(savedData);
+  // Buscar álbuns de todos os servidores
+  server.forEach((url, index) => {
+    const savedData = localStorage.getItem(`albumsData_${index}`);
+    if (savedData) {
+      const serverAlbums = JSON.parse(savedData);
+      albums = albums.concat(serverAlbums);
+    }
+  });
 
   // Filtra os álbuns que combinam com o título ou artista
   const filteredAlbums = albums.filter(album => {
@@ -205,11 +241,9 @@ document.getElementById('searchButton').addEventListener('click', () => {
   filteredAlbums.forEach(album => {
     const div = document.createElement('div');
     div.classList.add('dinamic-content-album');
-
     div.innerHTML = `
-    <h2>Resultados da Pesquisa:</h2><br>
       <div class="album-card">
-        <img src="${album.image}" alt="${album.title}" onclick="loadAlbum(${Number(album.id)})" class="album-image">
+        <img src="${album.image}" alt="${album.title}" onclick="loadAlbum(${Number(album.id)}, ${album.serverIndex})" class="album-image">
         <div class="album-info">
           <p class="dinamic-content-album-title">${album.title}</p>
           <a class="dinamic-content-album-artist">${album.artist}</a>
@@ -220,6 +254,7 @@ document.getElementById('searchButton').addEventListener('click', () => {
     container.appendChild(div);
   });
 });
+
 
 
 
