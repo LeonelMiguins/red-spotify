@@ -2,16 +2,22 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <html lang="pt-br" translate="no">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="css/style.css">
     <title>Dark Spotify</title>
 </head>
 <body>
+    <!-- Header -->
     <header>
         <div class="header-logo-container">
             <img class="header-logo" src="img/logo.png">
             <a>Red Spotify</a>
+            <button class="header-button-home" onclick="renderAlbumsFromStorage()">Home</button>
+            <button class="header-button-playlists">Playlists</button>
+            <button class="header-button-top-artist">Rádios</button>
         </div>
         <div class="header-search">
             <input
@@ -21,41 +27,56 @@
             />
             <div id="searchButton" style="cursor: pointer;"><img src="img/search.png"></div>
           </div>
-        <button class="header-button-home" onclick="renderAlbumsFromStorage()">Home</button>
-        <button class="header-button-playlists">Playlists</button>
-        <button class="header-button-top-artist">Rádios</button>
     </header>
 
     <!-- Conteúdo dinâmico gerado aqui-->
     <div class="dinamic-content" id="dinamic-content"></div>
 
-    <!-- Player -->
     <div class="player-container">
-        <audio id="audio-player">
-            <source id="player" src="" type="audio/mpeg">
-            Seu navegador não suporta áudio.
-        </audio>           
-        <div id="progress-bar" class="player-progress-bar">
-            <div id="progress" class="player-progress"></div>
+      <audio id="audio-player">
+        <source id="player" src="" type="audio/mpeg">
+        Seu navegador não suporta áudio.
+      </audio>
+    
+      <div id="progress-bar" class="player-progress-bar">
+        <div id="progress" class="player-progress"></div>
+      </div>
+    
+      <!-- Oculta no mobile -->
+      <div class="player-section left">
+        <img class="player-container-thumb" src="img/blank.jpg" />
+        <div class="player-container-title-artist">
+          <a class="player-container-title">Título da Música</a>
+          <a class="player-container-artist">Nome da Banda</a>
         </div>
-        <div class="player-container-info">
-            <div class="player-container-thumb">
-                <img src="img/blank.jpg">
-            </div>
-            <div class="player-container-title-artist">
-                <a class="player-container-title">Music Title</a>
-                <a class="player-container-artist">Music Artist</a>
-            </div>
-            <div class="player-container-controls">
-                <img onclick="prevTrack()" class="player-prev" src="img/prev.png">
-                <img class="player-play-pause" src="img/play.png">
-                <img onclick="nextTrack()" class="player-next" src="img/next.png">
-                <a id="download-btn" href="#" download>
-                  <img class="player-down" src="img/download.png">
-                </a>
-            </div>
+      </div>
+    
+      <!-- Aqui é onde o conteúdo principal deve estar -->
+      <div class="player-section center">
+        <img class="player-play-back" onclick="renderAlbumsFromStorage()" src="img/back.png" />
+        <div class="player-container-title-artist-mobile">
+          <a class="player-container-title-mobile">Título da Música</a>
+          <a class="player-container-artist-mobile">Nome da Banda</a>
         </div>
+    
+        <div class="player-container-controls">
+          <img class="player-play-prev" onclick="prevTrack()" src="img/prev.png" />
+          <img class="player-play-pause" src="img/play.png" />
+          <img class="player-play-next" onclick="nextTrack()" src="img/next.png" />
+        </div>
+      </div>
+    
+      <!-- Oculta no mobile -->
+      <div class="player-section right">
+        <a id="download-btn" href="#" download>
+          <img class="player-play-down" src="img/download.png" alt="Baixar música atual"/>
+        </a>
+        <img class="player-play-down" id="viewPlaylistBtn" src="img/playlist.png" alt="Abrir playlist atual"/>
+      </div>
     </div>
+    
+    
+      
 
     <script src="js/main.js"></script>
 
