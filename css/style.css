@@ -6,8 +6,8 @@
 
 body {
     font-family: 'Inter', sans-serif;
-    background-color: #ededed;
-    color: #282828;
+    background-color: #242424;
+    color: #ececec;
     width: 100%;
 }
 
@@ -26,9 +26,16 @@ header {
   z-index: 999;
 }
 
+header a {
+  margin-right: 50px;
+
+}
+
+
 
 .header-logo-container {
     display: flex;
+    width: 95%;
     align-items: center;
     padding-right: 50px;
     font-weight: 700;
@@ -77,33 +84,32 @@ header button {
 }
 
 .dinamic-content-album {
-    width: 220px;
-    color: #ebebeb;
-    background-color: #efefef;
+    width: 230px;
+    background-color: #181818;
     border-radius: 5px;
     margin: 3px;
     padding: 5px;
 }
 
 .dinamic-content-album-title {
-  color: #2a2a2a;
-  font-size: 13pt;
+  color: #dfdfdf;
+  font-size: 12pt;
   font-weight: 600;
   margin-bottom: 5px;
 }
 
 .dinamic-content-album-artist {
-  color: #303030;
-  font-size: 9pt;
+  color: #8e8e8e;
+  font-size: 8pt;
 }
 
 .dinamic-content-album img{
-    width: 210px;
+    width: 100%;
     border-radius: 5px 5px 0 0;
 
 }
 
-.container-album {
+ .container-album {
     margin: 0 auto;
     font-family: Arial, sans-serif;
     width: 900px;
@@ -114,7 +120,7 @@ header button {
     align-items: flex-start;
     gap: 20px;
     margin-bottom: 30px;
-    background-color: #353535;
+    background-color: #080808;
     color: #ececec;
     padding: 10px;
   }
@@ -179,15 +185,15 @@ header button {
   
   .album-music {
     display: grid;
-    grid-template-columns: 40px 1fr 1fr;
+    grid-template-columns: 35px 1.6fr 1fr;
     align-items: center;
-    padding: 10px;
+    padding: 8px;
     cursor: pointer;
     transition: background 0.2s;
   }
   
   .album-music:hover {
-    background-color: #e4e4e4;
+    background-color: #343434c9;
   }
   
   .track-index {
@@ -199,23 +205,24 @@ header button {
   
   .track-name {
     font-size: 1.2em;
-    color: #2b2b2b;
+    color: #c1c1c1;
     font-weight: 700;
   }
 
   .track-name:hover {
-    color: #8a3434;
+    color: #ff4c4c;
   
   }
   
   .track-artist {
-    color: #636363;
+    color: #8b8b8b;
     font-size: 1.1em;
   }
   
 
-.player-container {
-    background-color: rgba(11, 11, 11, 0.866);
+  /* estilo do player */
+  .player-container {
+    background-color: rgb(11, 11, 11);
     color: aliceblue;
     width: 100%;
     position: fixed;
@@ -225,69 +232,287 @@ header button {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap;
-}
-
-.player-progress-bar {
+    height: 70px;
+    box-sizing: border-box;
+  }
+  
+  /* Barra de progresso */
+  .player-progress-bar {
     position: absolute;
     top: 0;
     left: 0;
-    height: 5px;
+    height: 4px;
     width: 100%;
     background-color: #444;
     overflow: hidden;
-}
-
-.player-progress {
+  }
+  .player-progress {
     height: 100%;
     width: 0%;
     background-color: #a01f02;
     transition: width 0.3s ease;
-}
-
-
-.player-container-info {
+  }
+  
+  /* Seções */
+  .player-section {
     display: flex;
     align-items: center;
-    gap: 20px;
-    flex-wrap: wrap;
-    width: 100%;
-}
-
-.player-container-thumb img {
+    gap: 15px;
+    flex: 1;
+  }
+  .player-section.left {
+    justify-content: flex-start;
+  }
+  .player-section.center {
+    justify-content: center;
+  }
+  .player-section.right {
+    justify-content: flex-end;
+  }
+  
+  /* Thumb */
+  .player-container-thumb {
     width: 50px;
     height: 50px;
     object-fit: cover;
     border-radius: 5px;
-}
-
-.player-container-title-artist {
+  }
+  
+  /* Título + Artista */
+  .player-container-title-artist {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-}
+    line-height: 1.2;
+  }
 
-.player-container-title {
+  /*ocultaado no desktop, usado na versão mobile */
+  .player-container-title-artist-mobile {
+    display: none;
+  }
+  .player-container-title, 
+  .player-container-title-mobile {
     font-size: 15px;
-    font-weight: bolder;
-    color: #be5858;
-
-}
-
-.player-container-artist {
+    font-weight: bold;
+    color: #eaeaea;
+  }
+  .player-container-artist, 
+  .player-container-artist-mobile {
     font-size: 14px;
-    color: white;
-}
-
-.player-container-controls {
+    color: rgb(169, 169, 169);
+  }
+  
+  /* Controles */
+  .player-container-controls {
     display: flex;
-    gap: 10px;
-    align-items: center;
-    margin-left: auto;
-}
-
-.player-container-controls img {
-    width: 33px;
-    height: 33px;
+    gap: 12px;
+  }
+  .player-play-prev,
+  .player-play-next,
+  .player-play-down {
+    width: 32px;
+    height: 32px;
     cursor: pointer;
+  }
+  .player-play-pause {
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+  }
+
+  .player-play-back {
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    display: none;
+  }
+  
+
+/* Layout para dispositivos móveis */
+@media (max-width: 768px) {
+
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+    height: auto;
+    padding: 10px;
+    gap: 10px;
+    position: relative;
+  }
+
+  .header-logo-container {
+    padding-right: 0;
+  }
+
+  .header-button-home,
+  .header-button-playlists,
+  .header-button-radios
+  {
+    margin-right: 10px;
+
+  }
+
+  .header-search {
+    width: 100%;
+    margin: 0;
+    justify-content: space-between;
+  }
+
+  .header-search input {
+    width: 100%;
+    font-size: 14px;
+  }
+
+  header button {
+    margin-left: 0;
+    font-size: 14px;
+  }
+
+  .dinamic-content {
+    margin-top: 0px;
+  
+  }
+
+  .container-album-detalhe {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+    text-align: center;
+  }
+  .container-album-detalhe img {
+    width: 300px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    border: 5px solid black;
+  }
+  .album-music {
+    padding: 5px;
+  }
+  .track-name {
+    font-size: 12pt;
+    color: #ececec;
+    font-weight: 700;
+  }
+
+  /* Seção do mini player */ 
+    .player-container {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 15px;
+      height: 86px;
+
+    }
+  
+    .player-section {
+      display: flex;
+      align-items: center;
+    }
+  
+    .player-section.left {
+      display: none; /* Oculta a thumb no mobile */
+    }
+  
+    .player-section.center {
+      flex: 1;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    /*ocultado o mobile, usado na versão desktop */
+    .player-container-title-artist {
+      display: none;
+    }
+  
+    .player-container-title-artist-mobile {
+      display: flex;
+      flex-direction: column;
+      text-align: left;
+      position: static;
+      width: 200px;
+      max-width: 65%;
+    }
+  
+    .player-container-title,
+    .player-container-title-mobile {
+      font-size: 12pt;
+      font-weight: 500;
+      color: #f0f0f0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  
+    .player-container-artist,
+    .player-container-artist-mobile {
+      font-size: 11pt;
+      color: rgb(178, 178, 178);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  
+    .player-container-controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: flex-end;
+      width: 35%;
+    }
+
+    /* não mostra botão voltar no mobile para ter mais espaço*/
+    .player-play-prev {
+    display: none;
+    }
+  
+    .player-play-next,
+    .player-play-pause {
+      width: 45px;
+      height: 45px;
+      cursor: pointer;
+    }
+
+    .player-play-back {
+      display: inline;
+    
+    }
+  
+    .player-section.right {
+      display: none; /* Oculta o botão de download no mobile */
+    }
+  
+    .player-progress-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 4px;
+      width: 100%;
+      background-color: #444;
+    }
+  
+    .player-progress {
+      height: 100%;
+      width: 0%;
+      background-color: #a01f02;
+      transition: width 0.3s ease;
+    }
+
+  
+  .dinamic-content-album {
+    width: 160px;
+    border-radius: 5px;
+    margin: 3px;
+    padding: 5px;
+  }
+  .dinamic-content-album img{
+    width: 140px;
+    border-radius: 5px 5px 0 0;
+
+  }
+  .player-progress-bar {
+    height: 8px;
+  }
+
+
 }
+  
