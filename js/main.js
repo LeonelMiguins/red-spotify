@@ -1,9 +1,15 @@
-const server = ['https://api.jsonbin.io/v3/b/682134c18960c979a597a07c', 'https://api.jsonbin.io/v3/b/6824b0a28a456b79669da82a','https://api.jsonbin.io/v3/b/6824bcf58561e97a5013d51c'];
+const server = [
+  'https://api.jsonbin.io/v3/b/682134c18960c979a597a07c',
+  'https://api.jsonbin.io/v3/b/6824b0a28a456b79669da82a',
+  'https://api.jsonbin.io/v3/b/6824bcf58561e97a5013d51c'
+];
 const container = document.getElementById('dinamic-content');
 const audioPlayer = document.getElementById('audio-player');
 const playerTitle = document.querySelector('.player-container-title');
 const playerArtist = document.querySelector('.player-container-artist');
-const playerImage = document.querySelector('.player-container-thumb img');
+const playerTitleMobile = document.querySelector('.player-container-title-mobile');
+const playerArtistMobile = document.querySelector('.player-container-artist-mobile');
+const playerImage = document.querySelector('.player-container-thumb');
 const playPauseButton = document.querySelector('.player-play-pause');
 const progressBar = document.getElementById('progress-bar');
 const progress = document.getElementById('progress');
@@ -11,25 +17,26 @@ const progress = document.getElementById('progress');
 let currentTrack = null;
 let currentPlaylist = [];
 let currentTrackIndex = -1;
+let currentAlbumId = null;
+let currentServerIndex = null;
 
+// busca os jsons nos servidores
 function fetchAndStoreAlbums() {
   server.forEach((url, index) => {
     fetch(url)
       .then(response => response.json())
       .then(data => {
         const albums = Array.isArray(data.record) ? data.record : [data.record];
-        const serverKey = `albumsData_${index}`;  // Identificador único para cada servidor
+        const serverKey = `albumsData_${index}`;
         localStorage.setItem(serverKey, JSON.stringify(albums));
       })
       .catch(error => console.error('Erro ao buscar o JSON:', error));
   });
 }
 
-
 function renderAlbumsFromStorage() {
   container.innerHTML = ''; // Limpa o conteúdo anterior
-  
-  // Itera sobre os servidores para buscar os álbuns de cada um
+
   server.forEach((url, index) => {
     const serverKey = `albumsData_${index}`;
     const albums = JSON.parse(localStorage.getItem(serverKey));
@@ -40,7 +47,7 @@ function renderAlbumsFromStorage() {
         div.classList.add('dinamic-content-album');
 
         div.innerHTML = `
-          <img src="${album.image}" alt="${album.title}" onclick="loadAlbum(${Number(album.id)}, ${index})">
+          <img src="${album.image}" alt="${album.title}" onclick="loadAlbum(${Number(album.id)}, ${index})" style="cursor:pointer;">
           <p class="dinamic-content-album-title">${album.title}</p>
           <a class="dinamic-content-album-artist">${album.artist}</a>
         `;
@@ -51,11 +58,12 @@ function renderAlbumsFromStorage() {
   });
 }
 
-
 function loadAlbum(id, serverIndex) {
+
   const serverKey = `albumsData_${serverIndex}`;
   const albums = JSON.parse(localStorage.getItem(serverKey));
   const album = albums.find(a => a.id === Number(id));
+  
 
   if (!album) {
     container.innerHTML = '<p>Álbum não encontrado.</p>';
@@ -78,12 +86,11 @@ function loadAlbum(id, serverIndex) {
           </div>  
         </div>
       </div>
-      <h3>Faixas:</h3>
       <div class="album-musics">
         ${
           Array.isArray(album.tracks) && album.tracks.length > 0
             ? album.tracks.map((track, index) => `
-                <div class="album-music" onclick="playTrack('${track.url}', '${track.name}', '${track.artist}', '${album.image}', ${id}, ${index}, ${serverIndex})">
+                <div class="album-music" onclick="playTrack('${track.url}', '${track.name}', '${track.artist}', '${album.image}', ${id}, ${index}, ${serverIndex})" style="cursor:pointer;">
                   <span class="track-index">${index + 1}</span>
                   <span class="track-name">${track.name}</span>
                   <span class="track-artist">${track.artist}</span>
@@ -96,53 +103,61 @@ function loadAlbum(id, serverIndex) {
   `;
 }
 
-//tocar faixa selecionada
-function playTrack(url, title, artist, image, albumId = null, index = null, serverIndex) {
+function playTrack(url, title, artist, image, albumId = null, index = null, serverIndex = null) {
+  //salva o id e o servidor do album atual, para ser usado em outras partes
+  localStorage.setItem('currentAlbumServer', serverIndex);
+  localStorage.setItem('currentAlbumId', albumId);
+
   audioPlayer.src = url;
   audioPlayer.play().catch(error => console.error("Erro ao tentar tocar a música:", error));
 
   playerTitle.textContent = title;
   playerArtist.textContent = artist;
+  playerTitleMobile.textContent = title;
+  playerArtistMobile.textContent = artist;
+
   playerImage.src = image;
 
   playPauseButton.src = 'img/pause.png';
 
   currentTrack = { url, title, artist, image };
 
-  // Atualiza o botão de download com a URL da faixa atual
-  document.getElementById('download-btn').href = url;
+  // Atualiza o botão de download
+  const downloadBtn = document.getElementById('download-btn');
+  if (downloadBtn) {
+    downloadBtn.href = url;
+    downloadBtn.setAttribute('download', ''); // Força o navegador a baixar o arquivo
+  }
 
-  if (albumId !== null && index !== null) {
+  if (albumId !== null && index !== null && serverIndex !== null) {
     const serverKey = `albumsData_${serverIndex}`;
     const albums = JSON.parse(localStorage.getItem(serverKey));
-    const album = albums.find(a => a.id === albumId);
+    const album = albums.find(a => a.id === Number(albumId));
     if (album && Array.isArray(album.tracks)) {
       currentPlaylist = album.tracks;
       currentTrackIndex = index;
+      currentAlbumId = albumId;
+      currentServerIndex = serverIndex;
     }
   }
 }
 
-
-//próxima música
 function nextTrack() {
   if (currentPlaylist.length > 0 && currentTrackIndex < currentPlaylist.length - 1) {
     currentTrackIndex++;
     const track = currentPlaylist[currentTrackIndex];
-    playTrack(track.url, track.name, track.artist, playerImage.src, null, currentTrackIndex);
+    playTrack(track.url, track.name, track.artist, playerImage.src, currentAlbumId, currentTrackIndex, currentServerIndex);
   }
 }
 
-//música anterior
 function prevTrack() {
   if (currentPlaylist.length > 0 && currentTrackIndex > 0) {
     currentTrackIndex--;
     const track = currentPlaylist[currentTrackIndex];
-    playTrack(track.url, track.name, track.artist, playerImage.src, null, currentTrackIndex);
+    playTrack(track.url, track.name, track.artist, playerImage.src, currentAlbumId, currentTrackIndex, currentServerIndex);
   }
 }
 
-// botão "ouvir" playlist
 function playFirstTrack(albumId, serverIndex) {
   const serverKey = `albumsData_${serverIndex}`;
   const albums = JSON.parse(localStorage.getItem(serverKey));
@@ -159,13 +174,15 @@ function playFirstTrack(albumId, serverIndex) {
   const firstTrack = album.tracks[0];
   currentPlaylist = album.tracks;
   currentTrackIndex = 0;
+  currentAlbumId = albumId;
+  currentServerIndex = serverIndex;
 
   playTrack(firstTrack.url, firstTrack.name, firstTrack.artist, album.image, albumId, 0, serverIndex);
 }
 
-
 // Atualiza a barra de progresso conforme a música toca
 audioPlayer.addEventListener('timeupdate', () => {
+  if (!audioPlayer.duration) return;
   const percentage = (audioPlayer.currentTime / audioPlayer.duration) * 100;
   progress.style.width = `${percentage}%`;
 });
@@ -181,16 +198,7 @@ playPauseButton.addEventListener('click', () => {
   }
 });
 
-// Toca próxima faixa automaticamente ao terminar
-audioPlayer.addEventListener('ended', nextTrack);
-window.onload = () => {
-  if (!localStorage.getItem('albumsData')) {
-    fetchAndStoreAlbums();
-  }
-  renderAlbumsFromStorage();
-};
-
-//Permitir clique na barra para pular para uma posição
+// Permitir clique na barra para pular para uma posição
 progressBar.addEventListener('click', (event) => {
   const rect = progressBar.getBoundingClientRect();
   const clickX = event.clientX - rect.left;
@@ -200,67 +208,76 @@ progressBar.addEventListener('click', (event) => {
   audioPlayer.currentTime = (clickX / width) * duration;
 });
 
+// Quando a música termina, toca a próxima automaticamente
+audioPlayer.addEventListener('ended', function () {
+  nextTrack();
+});
 
-// Função de pesquisa
+// Pesquisa de álbuns
 document.getElementById('searchButton').addEventListener('click', () => {
   const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
-  const container = document.getElementById('dinamic-content'); // corrigido aqui
-
   if (!container) {
     console.error("Elemento com id 'dinamic-content' não encontrado.");
     return;
   }
 
-  container.innerHTML = ''; // Limpa o conteúdo anterior
+  container.innerHTML = '';
 
   let albums = [];
 
-  // Buscar álbuns de todos os servidores
   server.forEach((url, index) => {
     const savedData = localStorage.getItem(`albumsData_${index}`);
     if (savedData) {
       const serverAlbums = JSON.parse(savedData);
-      albums = albums.concat(serverAlbums);
+
+      // Adiciona o serverIndex a cada álbum
+      const albumsWithIndex = serverAlbums.map(album => ({
+        ...album,
+        serverIndex: index
+      }));
+
+      albums = albums.concat(albumsWithIndex);
     }
   });
 
-  // Filtra os álbuns que combinam com o título ou artista
-  const filteredAlbums = albums.filter(album => {
-    return (
-      album.title.toLowerCase().includes(searchTerm) ||
-      album.artist.toLowerCase().includes(searchTerm)
-    );
-  });
+  const filteredAlbums = albums.filter(album =>
+    album.title.toLowerCase().includes(searchTerm) ||
+    album.artist.toLowerCase().includes(searchTerm)
+  );
 
   if (filteredAlbums.length === 0) {
     container.innerHTML = '<p>Nenhum álbum encontrado.</p>';
     return;
   }
 
-  // Renderiza os álbuns filtrados
   filteredAlbums.forEach(album => {
     const div = document.createElement('div');
     div.classList.add('dinamic-content-album');
     div.innerHTML = `
       <div class="album-card">
-        <img src="${album.image}" alt="${album.title}" onclick="loadAlbum(${Number(album.id)}, ${album.serverIndex})" class="album-image">
+        <img src="${album.image}" alt="${album.title}" onclick="loadAlbum(${Number(album.id)}, ${album.serverIndex})" class="album-image" style="cursor:pointer;">
         <div class="album-info">
           <p class="dinamic-content-album-title">${album.title}</p>
-          <a class="dinamic-content-album-artist">${album.artist}</a>
+          <p class="dinamic-content-album-artist">${album.artist}</p>
         </div>
       </div>
     `;
-
     container.appendChild(div);
   });
 });
 
 
 
+document.getElementById('viewPlaylistBtn').addEventListener('click', () => {
+  const serverIndex = localStorage.getItem('currentAlbumServer');
+  const albumId = localStorage.getItem('currentAlbumId');
+
+  loadAlbum(Number(albumId), Number(serverIndex));
+
+});
 
 
 
-window.onload = () => {
-  fetchAndStoreAlbums(); // Sempre busca os dados mais recentes
-  setTimeout(renderAlbumsFromStorage, 500);
-};
+// Inicializa tudo
+fetchAndStoreAlbums();
+renderAlbumsFromStorage();
